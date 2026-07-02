@@ -1,0 +1,37 @@
+JSW Steel ERS - Model Training Results
+======================================================================
+
+XGBoost Results:
+  Accuracy: 0.7725
+  F1 (Weighted): 0.7728
+  ROC-AUC: 0.9323
+  CV F1: 0.7796 ± 0.0136
+
+              precision    recall  f1-score   support
+
+         LOW       0.80      0.74      0.77        70
+      MEDIUM       0.71      0.74      0.72       122
+        HIGH       0.77      0.77      0.77       128
+    CRITICAL       0.86      0.86      0.86        80
+
+    accuracy                           0.77       400
+   macro avg       0.78      0.78      0.78       400
+weighted avg       0.77      0.77      0.77       400
+
+
+Random Forest Results:
+  Accuracy: 0.7975
+  F1 (Weighted): 0.7965
+  ROC-AUC: 0.9365
+  CV F1: 0.7943 ± 0.0146
+
+              precision    recall  f1-score   support
+
+         LOW       0.77      0.81      0.79        70
+      MEDIUM       0.77      0.71      0.74       122
+        HIGH       0.80      0.80      0.80       128
+    CRITICAL       0.86      0.90      0.88        80
+
+    accuracy                           0.80       400
+   macro avg       0.80      0.81      0.80       400
+weighted avg       0.80      0.80      0.80       400

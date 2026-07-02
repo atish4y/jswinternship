@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSW ERS - AI Predictive Maintenance Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="jsw-layout">
+        <!-- Top Branding Header -->
+        <header class="jsw-header">
+            <div class="header-logo">
+                <div class="jsw-brand">JSW Steel</div>
+                <div class="ers-title">Electrical Repair Shop (ERS) AI Portal</div>
+            </div>
+            <div class="user-meta">
+                <div class="pulse-dot"></div>
+                <span class="active-status">XGBoost Engine Online</span>
+                <span class="divider">|</span>
+                <span>Welcome, Operator_05</span>
+                <div class="avatar">OP</div>
+            </div>
+        </header>
+
+        <!-- Top Tab Bar Navigation -->
+        <div class="jsw-tab-container">
+            <div class="tab-bar">
+                <button class="tab-btn active" id="tab-repair-status" onclick="switchView('repair-status')">Motor Repair Status</button>
+                <button class="tab-btn" id="tab-week-comp" onclick="switchView('week-comp')">Week Comparison</button>
+                <button class="tab-btn" id="tab-category" onclick="switchView('category')">Category Analysis</button>
+                <button class="tab-btn" id="tab-repair-analysis" onclick="switchView('repair-analysis')">Repair Analysis</button>
+                <button class="tab-btn" id="tab-turnaround" onclick="switchView('turnaround')">Turnaround Time</button>
+                <button class="tab-btn" id="tab-registry" onclick="switchView('registry')">Equipment Registry</button>
+                <button class="tab-btn" id="tab-inspection" onclick="switchView('inspection')">AI Inspection Form</button>
+            </div>
+            <p class="tab-subtext">Click any button to analyse motor performance graphs. Click again to hide the charts.</p>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="jsw-main-content">
+
+            <!-- SECTION 1: MOTOR REPAIR STATUS -->
+            <section id="view-repair-status" class="view-section active">
+                <div class="dashboard-grid">
+                    <!-- LT Motors Data -->
+                    <div class="jsw-card">
+                        <h3 class="card-title">LT Motors Data</h3>
+                        <div class="chart-container">
+                            <canvas id="ltMotorsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Pending Motors Status -->
+                    <div class="jsw-card">
+                        <h3 class="card-title">Pending Motors Status</h3>
+                        <div class="chart-container">
+                            <canvas id="pendingMotorsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Pending at User Department -->
+                    <div class="jsw-card">
+                        <h3 class="card-title">Pending at User Department</h3>
+                        <div class="chart-container">
+                            <canvas id="pendingUserChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Pending at ERS -->
+                    <div class="jsw-card">
+                        <h3 class="card-title">Pending at ERS</h3>
+                        <div class="chart-container">
+                            <canvas id="pendingErsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: WEEK COMPARISON -->
+            <section id="view-week-comp" class="view-section" style="display: none;">
+                <div class="jsw-card full-width">
+                    <h3 class="card-title">Weekly Received vs Repaired Comparison</h3>
+                    <div class="chart-container-large">
+                        <canvas id="weekComparisonChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: CATEGORY ANALYSIS -->
+            <section id="view-category" class="view-section" style="display: none;">
+                <div class="jsw-card full-width">
+                    <h3 class="card-title">Category Wise Received Vs Repaired</h3>
+                    <div class="chart-container-large">
+                        <canvas id="categoryAnalysisChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: REPAIR ANALYSIS -->
+            <section id="view-repair-analysis" class="view-section" style="display: none;">
+                <div class="jsw-card full-width">
+                    <h3 class="card-title">Failure Reason Breakdown & Service Classifications</h3>
+                    <div class="chart-container-large">
+                        <canvas id="repairAnalysisChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: TURNAROUND TIME -->
+            <section id="view-turnaround" class="view-section" style="display: none;">
+                <div class="jsw-card full-width">
+                    <h2 class="section-title">MOTOR TURN AROUND TIME</h2>
+                    
+                    <div class="turnaround-table-wrapper">
+                        <!-- Rewinding Table -->
+                        <table class="jsw-table turnaround-table">
+                            <thead>
+                                <tr>
+                                    <th>Rewinding</th>
+                                    <th>0 - 7 Days</th>
+                                    <th>08 - 15 Days</th>
+                                    <th>15 - 30 Days</th>
+                                    <th>&gt; 30 Days</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="bold">Counts</td>
+                                    <td id="rew-0-7">-</td>
+                                    <td id="rew-8-15">-</td>
+                                    <td id="rew-15-30">-</td>
+                                    <td id="rew-30-plus">-</td>
+                                    <td id="rew-total" class="bold">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Overhauling Table -->
+                        <table class="jsw-table turnaround-table mt-4">
+                            <thead>
+                                <tr>
+                                    <th>Overhauling</th>
+                                    <th>0 - 3 Days</th>
+                                    <th>04 - 07 Days</th>
+                                    <th>07 - 15 Days</th>
+                                    <th>&gt; 15 Days</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="bold">Counts</td>
+                                    <td id="ovh-0-3">-</td>
+                                    <td id="ovh-4-7">-</td>
+                                    <td id="ovh-7-15">-</td>
+                                    <td id="ovh-15-plus">-</td>
+                                    <td id="ovh-total" class="bold">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: EQUIPMENT REGISTRY -->
+            <section id="view-registry" class="view-section" style="display: none;">
+                <div class="jsw-card full-width overflow-x">
+                    <div class="registry-header">
+                        <h3 class="card-title">Motor Registry & AI Risk Status</h3>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="registry-search" placeholder="Filter by Serial No, Make, Model, Dept..." onkeyup="filterRegistryTable()">
+                        </div>
+                    </div>
+                    
+                    <table class="jsw-table registry-table" id="registry-table">
+                        <thead>
+                            <tr>
+                                <th>Equipment ID</th>
+                                <th>Allotment</th>
+                                <th>Main Equipment Name</th>
+                                <th>Serial No</th>
+                                <th>Mfg Year</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th>KW</th>
+                                <th>Frame</th>
+                                <th>RPM</th>
+                                <th>Voltage</th>
+                                <th>Department</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registry-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 7: AI INSPECTION FORM -->
+            <section id="view-inspection" class="view-section" style="display: none;">
+                <div class="inspection-layout">
+                    <!-- Left: Checklist Form -->
+                    <div class="jsw-card checklist-card">
+                        <h3 class="card-title">Motor Inspection Checkpoints</h3>
+                        
+                        <div class="select-motor-banner">
+                            <label for="inspect-motor-select">Select Equipment Serial:</label>
+                            <select id="inspect-motor-select" onchange="resetChecklistForMotor()">
+                                <option value="">Select Motor Serial...</option>
+                            </select>
+                        </div>
+
+                        <div class="checklist-grid">
+                            <!-- Column 1 -->
+                            <div class="checklist-column">
+                                <div class="checklist-header">Code / Particulars / Action</div>
+                                <div class="checkbox-row">
+                                    <span class="code">G1</span>
+                                    <span class="particulars">Ingress of Dust</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-G1"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">G2</span>
+                                    <span class="particulars">Ingress of Water</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-G2"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">G3</span>
+                                    <span class="particulars">Ingress of Oil</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-G3"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">G4</span>
+                                    <span class="particulars">Mechanical Damage</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-G4"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">G5</span>
+                                    <span class="particulars">Corrosion Observed</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-G5"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">G6</span>
+                                    <span class="particulars">Loose Fasteners</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-G6"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">R1</span>
+                                    <span class="particulars">Rotor Shaft Damage</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-R1"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">R2</span>
+                                    <span class="particulars">Bearing Seating Condition</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-R2"><span></span></label>
+                                </div>
+                            </div>
+
+                            <!-- Column 2 -->
+                            <div class="checklist-column">
+                                <div class="checklist-header">Code / Particulars / Action</div>
+                                <div class="checkbox-row">
+                                    <span class="code">R3</span>
+                                    <span class="particulars">Rotor Bar Damage</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-R3"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">R4</span>
+                                    <span class="particulars">Fan Blade Damage</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-R4"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">R5</span>
+                                    <span class="particulars">Unusual Wear Marks</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-R5"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">S1</span>
+                                    <span class="particulars">Stator Winding Condition</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-S1"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">S2</span>
+                                    <span class="particulars">Insulation Damage</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-S2"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">S3</span>
+                                    <span class="particulars">Burning Marks Present</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-S3"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">S4</span>
+                                    <span class="particulars">Slot Wedge Condition</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-S4"><span></span></label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <span class="code">S5</span>
+                                    <span class="particulars">Core Lamination Damage</span>
+                                    <label class="toggle-btn"><input type="checkbox" id="chk-S5"><span></span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-inputs-row">
+                            <div class="input-grp">
+                                <label for="inspect-reason">Reason of Failure:</label>
+                                <select id="inspect-reason">
+                                    <option value="None">None</option>
+                                    <option value="Bearing Failure">Bearings Failure</option>
+                                    <option value="Winding Failure">Winding Failure</option>
+                                    <option value="Rotor Failure">Rotor Failure</option>
+                                    <option value="Insulation Failure">Insulation Failure</option>
+                                </select>
+                            </div>
+                            <div class="input-grp">
+                                <label for="inspect-remarks">Remarks:</label>
+                                <input type="text" id="inspect-remarks" placeholder="Enter inspection notes...">
+                            </div>
+                        </div>
+
+                        <div class="checklist-actions">
+                            <button class="jsw-btn btn-success" onclick="runChecklistAI()">Predict AI Risk</button>
+                            <button class="jsw-btn btn-primary" onclick="alert('Inspection Saved to Database')">Save</button>
+                            <button class="jsw-btn btn-danger" onclick="alert('Inspection Rejected')">Reject</button>
+                        </div>
+                    </div>
+
+                    <!-- Right: AI Live Prediction Report -->
+                    <div class="jsw-card live-report-card">
+                        <h3 class="card-title text-center">AI Live Inspection Risk Analysis</h3>
+                        <div id="no-inspection-selected" class="no-selection">
+                            <p>Select a motor serial and check diagnostic points, then click <strong>Predict AI Risk</strong> to run the XGBoost inference model live.</p>
+                        </div>
+
+                        <div id="live-ai-results" style="display: none;">
+                            <div class="health-gauge">
+                                <div class="circular-progress" id="inspect-health-circle">
+                                    <span class="progress-val" id="inspect-health-val">0</span>
+                                    <span class="progress-unit">/100</span>
+                                </div>
+                                <div class="risk-pill" id="inspect-risk-pill">LOW RISK</div>
+                            </div>
+                            
+                            <div class="report-box">
+                                <h4 class="box-title">XGBoost Evaluation</h4>
+                                <p class="recommendation-text" id="inspect-recommendation">-</p>
+                                <div class="date-field">
+                                    <strong>Inspection Urgency Target:</strong> <span id="inspect-target-date">-</span>
+                                </div>
+                            </div>
+
+                            <div class="probabilities-section">
+                                <h4>Model Sub-Component Failure Probabilities</h4>
+                                <div id="inspect-probabilities-bars">
+                                    <!-- Dynamic bars -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- AI DIAGNOSTICS REPORT MODAL (Triggered from Equipment Registry) -->
+    <div class="jsw-modal" id="diagnostics-modal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>AI Motor Failure Prediction Report</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </header>
+            <div class="modal-body">
+                <!-- Top details block -->
+                <div class="modal-details-grid">
+                    <div class="meta-box">
+                        <h4>Equipment Specifications</h4>
+                        <div class="meta-row"><span>Serial No:</span> <strong id="modal-serial">-</strong></div>
+                        <div class="meta-row"><span>Equipment Name:</span> <strong id="modal-eq-name">-</strong></div>
+                        <div class="meta-row"><span>Manufacturer:</span> <strong id="modal-make">-</strong></div>
+                        <div class="meta-row"><span>Model:</span> <strong id="modal-model">-</strong></div>
+                        <div class="meta-row"><span>Power Size:</span> <strong id="modal-kw">-</strong></div>
+                        <div class="meta-row"><span>RPM / Voltage:</span> <strong id="modal-rpm-v">-</strong></div>
+                        <div class="meta-row"><span>Mfg Year:</span> <strong id="modal-year">-</strong></div>
+                        <div class="meta-row"><span>Location:</span> <strong id="modal-loc">-</strong></div>
+                    </div>
+
+                    <!-- Health assessment panel -->
+                    <div class="health-assessment-box">
+                        <h4>AI Health Assessment</h4>
+                        <div class="health-gauge-large">
+                            <div class="circular-progress-large" id="modal-health-circle">
+                                <span class="progress-val-large" id="modal-health-val">0</span>
+                                <span class="progress-unit-large">/100</span>
+                            </div>
+                            <div class="risk-pill-large" id="modal-risk-pill">LOW RISK</div>
+                        </div>
+                        <div class="rec-card" id="modal-rec-card">
+                            <h5>Suggested Action:</h5>
+                            <p id="modal-recommendation">-</p>
+                            <span class="inspect-target">Target Date: <strong id="modal-target-date">-</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Probabilities bar chart -->
+                <div class="modal-probabilities-card">
+                    <h4>Component Probability Breakdown (XGBoost Multiclass Output)</h4>
+                    <div class="probabilities-container">
+                        <div class="chart-wrapper">
+                            <canvas id="modalProbabilitiesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button class="jsw-btn btn-primary" onclick="closeModal()">Acknowledge & Close</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

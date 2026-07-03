@@ -29,18 +29,35 @@ Here are the mockups of the redesigned ERS portal tabs:
 
 ### 1. Motor Repair Status (Active Queue Charts)
 ![Motor Repair Status](outputs/screenshots/repair_status.png)
+*   **Description:** Displays real-time statistics of the Electrical Repair Shop (ERS) queue. Tracks current in-repair vs. completed counts, groups pending repairs by customer departments (e.g. Hot Strip Mill, Blast Furnace), and details workload distributions inside the ERS.
 
 ### 2. Week Comparison (Received vs Repaired Trends)
 ![Week Comparison](outputs/screenshots/week_comparison.png)
+*   **Description:** A time-series trend visualization charting the weekly volume of incoming motors against successfully completed repairs over an 8-week cycle. Used to detect backlog spikes and monitor capacity limits.
 
 ### 3. Category Analysis (KW-divided Repair Counts)
 ![Category Analysis](outputs/screenshots/category_analysis.png)
+*   **Description:** A comparative column chart breaking down repair requests by power classification (Large Motors > 100 KW, Medium Motors 25.1-100 KW, and Small Motors <= 25 KW). Helps ERS engineers analyze repair complexity trends.
 
 ### 4. Repair Analysis (Failure Reason Breakdown)
 ![Repair Analysis](outputs/screenshots/repair_analysis.png)
+*   **Description:** A Pareto-style visualization tracking the primary failure modes diagnosed in ERS (Bearing failures, Winding faults, Rotor wear, Insulation degradation). Helps target systemic mechanical and electrical weaknesses in the fleet.
 
 ### 5. Turnaround Time (Rewinding & Overhauling Matrices)
 ![Turnaround Time](outputs/screenshots/turnaround_time.png)
+*   **Description:** An SLA tracking grid showing the turnaround time (TAT) distribution grouped by repair type (Rewinding vs Overhauling). Counts are segmented into operational speed categories (0-7 days, 8-15 days, 15-30 days, etc.).
+
+### 6. Equipment Registry & AI Risk Status
+![Equipment Registry](outputs/screenshots/equipment_registry.png)
+*   **Description:** The centralized motor inventory grid. It lists all active motors in the plant with their technical specs (KW, Frame, RPM, Voltage, Department) and features a direct "Analyze" action to trigger deep diagnostics.
+
+### 7. AI Diagnostics Report Modal
+![AI Diagnostics Report](outputs/screenshots/diagnostics_modal.png)
+*   **Description:** A detailed health assessment sheet triggered from the registry. It runs the motor's historical telemetry and repair count through the XGBoost model to produce a 0-100 Health Score, risk level, condition-based inspection target date, and a sub-component probability bar chart.
+
+### 8. AI Inspection Checklist Form
+![AI Inspection Form](outputs/screenshots/ai_inspection.png)
+*   **Description:** The operator's live checklist tool. Checking off standard visual observations (like G2 water ingress or S2 insulation damage) dynamically recalculates the health score and details bearing/winding/rotor failure probabilities, showing 1-2 line real-time maintenance advisories underneath.
 
 ---
 

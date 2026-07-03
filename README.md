@@ -197,8 +197,4 @@ To merge this into the existing Angular frontend:
 3.  **UI Components:** 
     Drop the radial progress circle and progress bars (using vanilla HTML/CSS which is 100% compatible with Angular templates) directly onto the right-hand panel of the checklist page to show the live AI scores.
 
----
 
-### 💡 Pro-Tip for your Presentation:
-If they ask, **"How long will it take to merge?"** Tell them:
-> *"Since the model is exported to ONNX, a Java backend developer can add the dependency, write the inference class, and connect it to a database query in **less than 2 days**. A frontend Angular developer can bind the click events and render the charts in **1-2 days**. It is a 1-week merge process."*

@@ -6,12 +6,13 @@ An enterprise-ready AI predictive maintenance system integrated with JSW Steel's
 
 ## 📖 Table of Contents
 1. [Project Overview](#-project-overview)
-2. [Technical Architecture](#-technical-architecture)
-3. [Feature Engineering Pipeline](#-feature-engineering-pipeline)
-4. [Machine Learning Model](#-machine-learning-model)
-5. [JVM-Native Deployment (ONNX)](#-jvm-native-deployment-onnx)
-6. [Knowledge Transfer (KT) & Integration Guide](#-knowledge-transfer-kt--integration-guide)
-7. [Installation & Local Execution](#-installation--local-execution)
+2. [Portal Screenshots](#-portal-screenshots)
+3. [Technical Architecture](#-technical-architecture)
+4. [Feature Engineering Pipeline](#-feature-engineering-pipeline)
+5. [Machine Learning Model](#-machine-learning-model)
+6. [JVM-Native Deployment (ONNX)](#-jvm-native-deployment-onnx)
+7. [Knowledge Transfer (KT) & Integration Guide](#-knowledge-transfer-kt--integration-guide)
+8. [Installation & Local Execution](#-installation--local-execution)
 
 ---
 
@@ -20,6 +21,26 @@ The Electrical Repair Shop (ERS) processes motor repairs across various departme
 *   **Active Risk Assessment:** Predicts motor health score (0-100) and risk category (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`).
 *   **Component-Level Diagnostics:** Evaluates probability scores for individual failure vectors (Bearing, Winding, Rotor, Insulation).
 *   **Dynamic AI Inspection:** Connects operator checklist items in real-time to the XGBoost inference model to forecast failure risks before disassembly.
+
+---
+
+## 🖼 Portal Screenshots
+Here are the mockups of the redesigned ERS portal tabs:
+
+### 1. Motor Repair Status (Active Queue Charts)
+![Motor Repair Status](outputs/screenshots/repair_status.png)
+
+### 2. Week Comparison (Received vs Repaired Trends)
+![Week Comparison](outputs/screenshots/week_comparison.png)
+
+### 3. Category Analysis (KW-divided Repair Counts)
+![Category Analysis](outputs/screenshots/category_analysis.png)
+
+### 4. Repair Analysis (Failure Reason Breakdown)
+![Repair Analysis](outputs/screenshots/repair_analysis.png)
+
+### 5. Turnaround Time (Rewinding & Overhauling Matrices)
+![Turnaround Time](outputs/screenshots/turnaround_time.png)
 
 ---
 

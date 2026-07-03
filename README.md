@@ -62,90 +62,105 @@ Rather than hosting a Flask or FastAPI Python sidecar (which introduces network 
 ---
 
 ## 🎓 Knowledge Transfer (KT) & Integration Guide
-This section guides ERS engineers on how to deploy this portal live in JSW's actual ERS application.
+This section contains full implementation instructions to deploy this portal live within JSW's actual ERS application.
 
-### 1. Java Backend Integration (Tomcat)
-Add the ONNX Runtime dependency to your Java project's Maven configuration (`pom.xml`):
-
-```xml
-<dependency>
-    <groupId>com.microsoft.onnxruntime</groupId>
-    <artifactId>onnxruntime</artifactId>
-    <version>1.16.3</version>
-</dependency>
-```
-
-Add the following class to your Java source code to run native, in-memory model inferences:
-
-```java
-package com.jsw.ers.service;
-
-import ai.onnxruntime.*;
-import java.util.*;
-import java.nio.FloatBuffer;
-
-public class PredictiveMaintenanceService {
-    private OrtEnvironment env;
-    private OrtSession session;
-
-    public PredictiveMaintenanceService(String modelPath) throws OrtException {
-        this.env = OrtEnvironment.getEnvironment();
-        this.session = env.createSession(modelPath, new OrtSession.SessionOptions());
-    }
-
-    public float[] predictRisk(float[] featureArray) throws OrtException {
-        // featureArray must contain the 18 engineered features in exact order
-        String inputName = session.getInputNames().iterator().next();
-        long[] shape = new long[]{1, 18};
-        
-        try (OnnxTensor tensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(featureArray), shape)) {
-            Map<String, OnnxTensor> inputs = Collections.singletonMap(inputName, tensor);
-            try (OrtSession.Result results = session.run(inputs)) {
-                float[][] output = (float[][]) results.get(0).getValue();
-                return output[0]; // Returns [Prob_LOW, Prob_MEDIUM, Prob_HIGH, Prob_CRITICAL]
-            }
-        }
-    }
-}
-```
-
-### 2. Relational Database Mapping (SQL)
-When an operator triggers a prediction request:
-1.  Query the motor's specs and repair records using JDBC or Hibernate.
-2.  Populate a float array of length 18 representing the features.
-3.  If on the Inspection Form, increment corresponding counts in the float array (e.g. if checklist items for `R2: Bearing Seating Condition` are checked, increment feature `12` (`bearing_failure_count`) by `1.0f`).
-4.  Execute `predictRisk(features)` and return the values as JSON to the UI.
-
-### 3. Angular UI Integration
-*   **For the Registry Table:** Add an `(click)="analyzeMotor(motor.serialNo)"` event binding to trigger the diagnostics details modal.
-*   **For the Inspection Form:** Replicate the checklist checkboxes from the prototype HTML, map them to an array of codes, and POST them to the java endpoint on click.
-
----
-
-## 🚀 Installation & Local Execution
-
-### Prerequisites
-*   Python 3.8+ (for local training/simulation)
-*   Web Browser
-
-### Local Installation
-1.  Clone or copy the directory:
+### Phase 1: Local Installation (For Python/ML Developers)
+If JSW developers want to run, test, or retrain the machine learning model locally on their computers:
+1.  **Clone the Repository:** 
     ```bash
-    cd c:/Users/atish/jswinternship
+    git clone https://github.com/atish4y/jswinternship.git
     ```
-2.  Install dependencies:
+2.  **Set up a Virtual Environment (venv):**
+    To keep the Python libraries isolated and prevent conflicts, we set up a virtual environment (`venv`) before installing dependencies:
+    *   **Create the environment:**
+        ```bash
+        python -m venv venv
+        ```
+    *   **Activate it (Windows PowerShell/CMD):**
+        ```bash
+        venv\Scripts\activate
+        ```
+    *   **Activate it (Linux/Mac):**
+        ```bash
+        source venv/bin/activate
+        ```
+3.  **Install Python Packages:** 
     ```bash
     pip install -r requirements.txt
     ```
-
-### Running the Project Locally
-1.  **Execute the Full Pipeline (Data Gen ➔ Features ➔ Training ➔ ONNX Export):**
+    *(Installs pandas, numpy, scikit-learn, xgboost, and onnxmltools)*
+4.  **Run the Pipeline:** 
     ```bash
     python src/run_pipeline.py
     ```
-2.  **Start the Web Portal Server:**
-    ```bash
-    python src/api.py
+    *(Generates synthetic dataset, runs feature engineering, trains the XGBoost model, and exports the production `xgboost_risk_model.onnx` file)*
+
+---
+
+### Phase 2: Backend Integration (Java / Tomcat Core)
+To merge this into the existing ERS Java backend:
+1.  **Import the ONNX Dependency:**
+    Add the official Microsoft ONNX Runtime dependency to the project's Maven configuration file (`pom.xml`):
+    ```xml
+    <dependency>
+        <groupId>com.microsoft.onnxruntime</groupId>
+        <artifactId>onnxruntime</artifactId>
+        <version>1.16.3</version>
+    </dependency>
     ```
-3.  **Open the Web Dashboard:**
-    Navigate to **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser to view the portal.
+2.  **Store the Model:** 
+    Place the exported `xgboost_risk_model.onnx` file into JSW's Java project `src/main/resources` folder.
+3.  **Deploy the Java Inference Service:**
+    Write a simple service class (e.g. `PredictiveMaintenanceService.java`) that loads the model once on application startup:
+    ```java
+    package com.jsw.ers.service;
+
+    import ai.onnxruntime.*;
+    import java.util.*;
+    import java.nio.FloatBuffer;
+
+    public class PredictiveMaintenanceService {
+        private OrtEnvironment env;
+        private OrtSession session;
+
+        public PredictiveMaintenanceService(String modelPath) throws OrtException {
+            this.env = OrtEnvironment.getEnvironment();
+            this.session = env.createSession(modelPath, new OrtSession.SessionOptions());
+        }
+
+        public float[] predictRisk(float[] featureArray) throws OrtException {
+            // featureArray must contain the 18 engineered features in exact order
+            String inputName = session.getInputNames().iterator().next();
+            long[] shape = new long[]{1, 18};
+            
+            try (OnnxTensor tensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(featureArray), shape)) {
+                Map<String, OnnxTensor> inputs = Collections.singletonMap(inputName, tensor);
+                try (OrtSession.Result results = session.run(inputs)) {
+                    float[][] output = (float[][]) results.get(0).getValue();
+                    return output[0]; // Returns [Prob_LOW, Prob_MEDIUM, Prob_HIGH, Prob_CRITICAL]
+                }
+            }
+        }
+    }
+    ```
+4.  **Database Mapping:** 
+    Write a SQL query to fetch the motor's parameters (e.g. `KW`, `RPM`, `Age`, and counts of past failures from the database). Convert these into an 18-element float array.
+    *   If on the active checklist form, temporarily increment the relevant failure count (e.g. if checklist items for `R2: Bearing Seating Condition` are checked, increment feature index `12` (`bearing_failure_count`) by `1.0f`).
+    *   Call `predictRisk(features)` using the loaded ONNX session in Java to perform the prediction.
+
+---
+
+### Phase 3: Frontend Integration (Angular Core)
+To merge this into the existing Angular frontend:
+1.  **Registry Table:** 
+    Add an "Analyze" button next to each motor row. When clicked, it calls a new REST API endpoint on the Tomcat server: `GET /api/predict/{serial_no}` and displays a popup modal showing the health score.
+2.  **Inspection Checklist Form:** 
+    In JSW's existing checklist component, capture the checkbox codes (`G1`-`G6`, `R1`-`R5`, `S1`-`S5`) when toggled, and send a JSON payload to a POST endpoint: `POST /api/predict/custom`.
+3.  **UI Components:** 
+    Drop the radial progress circle and progress bars (using vanilla HTML/CSS which is 100% compatible with Angular templates) directly onto the right-hand panel of the checklist page to show the live AI scores.
+
+---
+
+### 💡 Pro-Tip for your Presentation:
+If they ask, **"How long will it take to merge?"** Tell them:
+> *"Since the model is exported to ONNX, a Java backend developer can add the dependency, write the inference class, and connect it to a database query in **less than 2 days**. A frontend Angular developer can bind the click events and render the charts in **1-2 days**. It is a 1-week merge process."*
